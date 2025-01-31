@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Tracker</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; padding: 20px; }
+        input, select, button { margin: 10px; padding: 10px; border: none; border-radius: 5px; }
+        input, select { width: 200px; }
+        button { background-color: #28a745; color: white; cursor: pointer; }
+        button:hover { background-color: #218838; }
+        table { width: 60%; margin: 20px auto; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #007bff; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <h2 style="color: #007bff;">Workout Tracker</h2>
+    <input type="text" id="userName" placeholder="User Name">
+    <input type="text" id="workoutType" placeholder="Workout Type">
+    <input type="number" id="workoutMinutes" placeholder="Minutes">
+    <button onclick="addWorkout()">Add Workout</button>
+    
+    <h3 style="color: #007bff;">Workout List</h3>
+    <input type="text" id="searchText" onkeyup="filterWorkouts()" placeholder="Search by Name">
+    <select id="filterType" onchange="filterWorkouts()">
+        <option value="">All</option>
+    </select>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Minutes</th>
+            </tr>
+        </thead>
+        <tbody id="workoutTable"></tbody>
+    </table>
+
+    <script>
+        let workouts = JSON.parse(localStorage.getItem('workouts')) || [];
+
+        function addWorkout() {
+            let userName = document.getElementById('userName').value;
+            let workoutType = document.getElementById('workoutType').value;
+            let workoutMinutes = document.getElementById('workoutMinutes').value;
+            
+            if (userName && workoutType && workoutMinutes) {
+                workouts.push({ name: userName, type: workoutType, minutes: workoutMinutes });
+                localStorage.setItem('workouts', JSON.stringify(workouts));
+                displayWorkouts();
+            }
+        }
+
+        function displayWorkouts() {
+            let tableBody = document.getElementById('workoutTable');
+            let filterSelect = document.getElementById('filterType');
+            tableBody.innerHTML = '';
+            filterSelect.innerHTML = '<option value="">All</option>';
+            
+            let types = new Set();
+            workouts.forEach(workout => {
+                let row = `<tr><td>${workout.name}</td><td>${workout.type}</td><td>${workout.minutes}</td></tr>`;
+                tableBody.innerHTML += row;
+                types.add(workout.type);
+            });
+            types.forEach(type => {
+                filterSelect.innerHTML += `<option value="${type}">${type}</option>`;
+            });
+        }
+
+        function filterWorkouts() {
+            let searchText = document.getElementById('searchText').value.toLowerCase();
+            let filterType = document.getElementById('filterType').value;
+            let tableBody = document.getElementById('workoutTable');
+            tableBody.innerHTML = '';
+
+            workouts.filter(w => 
+                w.name.toLowerCase().includes(searchText) && 
+                (!filterType || w.type === filterType)
+            ).forEach(workout => {
+                let row = `<tr><td>${workout.name}</td><td>${workout.type}</td><td>${workout.minutes}</td></tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+        
+        displayWorkouts();
+    </script>
+</body>
+</html>
